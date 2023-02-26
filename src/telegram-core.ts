@@ -6,10 +6,10 @@ import { TelegramCoreOption, TelegramRequestOption, TelegramResponsePromise } fr
 import { replaceURLParams } from '@/utils';
 import TelegramChain from '@/telegram-chain';
 
-const DEFAULT_DOMAIN = '$$default$$';
+const DEFAULT_DOMAIN = Symbol('default');
 
 export default class TelegramCore {
-  private domainMap = new Map<string, TelegramCoreOption>();
+  private domainMap = new Map<string | symbol, TelegramCoreOption>();
 
   private readonly defaultOption: TelegramCoreOption = {
     headers: {
@@ -34,10 +34,7 @@ export default class TelegramCore {
    * @param domain
    * @param option
    */
-  public register(domain: string, option: TelegramCoreOption) {
-    if (domain === DEFAULT_DOMAIN) {
-      throw new TypeError('Domain cannot be set to default!');
-    }
+  public register(domain: string | symbol, option: TelegramCoreOption) {
     this.domainMap.set(domain, option);
     return this;
   }
@@ -46,10 +43,7 @@ export default class TelegramCore {
    * @description 取消注册一个业务域
    * @param domain
    */
-  public unregister(domain: string) {
-    if (domain === DEFAULT_DOMAIN) {
-      throw new TypeError('Unable to unregister default domain');
-    }
+  public unregister(domain: string | symbol) {
     this.domainMap.delete(domain);
     return this;
   }
@@ -180,7 +174,3 @@ export default class TelegramCore {
     return this.request(url, lastOption);
   }
 }
-
-// const http = new TelegramCore();
-// http.request('').then().catch();
-// http.request('').abort();
