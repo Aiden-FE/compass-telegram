@@ -1,6 +1,6 @@
 {
   "name": "@compass-aiden/telegram",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "基于Ky封装的Http请求模块",
   "main": "dist/telegram.es.js",
   "types": "types/telegram.es.d.ts",
