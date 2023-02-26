@@ -1,5 +1,6 @@
 import merge from 'lodash-es/merge';
 import set from 'lodash-es/set';
+import isObject from 'lodash-es/isObject';
 import { Hooks as KyHooks } from 'ky';
 import { SearchParamsOption } from 'ky/distribution/types/options';
 import {
@@ -75,7 +76,7 @@ export default class TelegramChain {
    * @description 设置请求所属域
    * @param domain
    */
-  public domain(domain: string) {
+  public domain(domain: string | symbol) {
     this.option.domain = domain;
     return this;
   }
@@ -84,9 +85,10 @@ export default class TelegramChain {
    * @description 设置请求body数据,如果是纯数据对象需要通过JSON.stringify()序列化,
    * 例如: chain().body(JSON.stringify({ test: 'test' }))
    * @param body
+   * @param [isStringify=true] 默认将对象数据进行序列化
    */
-  public body(body: BodyInit | null) {
-    this.option.body = body;
+  public body(body: BodyInit | Record<any, unknown> | null, isStringify = true) {
+    this.option.body = ((isStringify && isObject) ? JSON.stringify(body) : body) as BodyInit | null;
     return this;
   }
 

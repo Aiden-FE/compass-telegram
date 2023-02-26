@@ -10,7 +10,7 @@ KyOptions, 'method' | 'json' | 'parseJson' | 'searchParams' | 'onDownloadProgres
 }
 
 export interface TelegramRequestOption extends KyOptions {
-  domain?: string
+  domain?: string | symbol
   pathParams?: Record<string, string>
   disabledOptions?: TelegramChainDisableType[]
 }

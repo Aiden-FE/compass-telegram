@@ -13,12 +13,20 @@
     "types"
   ],
   "author": "Aiden_FE@outlook.com",
-  "repository": "",
+  "repository": "https://github.com/Aiden-FE/compass-telegram",
   "license": "MIT",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"
   },
+  "keywords": [
+    "fetch",
+    "http",
+    "http-client",
+    "http-request",
+    "ky",
+    "request"
+  ],
   "scripts": {
     "prepublish": "npm run lint && npm run build",
     "build": "npm run clean && rollup -c rollup.config.js",
