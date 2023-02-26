@@ -7,8 +7,22 @@
 <p>Hello World</p>
 
 <script type="module">
-  import { demo } from './dist/utils.es.js'
-  demo()
+  import Telegram from './dist/telegram.es.js'
+  const http = new Telegram({
+    prefixUrl: '/api'
+  });
+  http.register('lc', {
+    prefixUrl: '/lc/api'
+  });
+  http.request(':userId/post?view=true&t=1', {
+    domain: 'miss',
+    pathParams: {userId:'test'},
+    searchParams: { t: Date.now() }
+  });
+  http.request('https://github.com/sindresorhus/ky', {
+    domain: 'lc',
+    prefixUrl: ''
+  }).abort();
 </script>
 </body>
 </html>

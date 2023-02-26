@@ -8,21 +8,23 @@
 ```typescript
 import Telegram from '@compass-aiden/telegram';
 // 初始化模块
-const http = new Telegram({/* ...options */});
+const http = new Telegram({/* ...options */}); // 默认的请求配置, 所有不指定domain的请求都会应用此配置
 // 注册请求域配置
-http.register({
-  domain: 'default', // 可针对业务域配置特定的默认请求配置, 不提供则为default域,所有不指定domain的请求都会应用default域
-  /* 其他请求全局配置 */
-})
-  .register({/* 继续注册其他域,重复的domain会覆盖上一个 */});
-http.unregister('domain') // 取消一个已注册的域,如果指定default则无效,default不可被移除
+http.register(
+  'domainA', // 可针对业务域配置特定的默认请求配置, 所有指定domain为domainA的请求都会应用domainA域的请求配置
+  {}, /* domainA域的请求全局配置 */
+)
+  .register(/* 继续注册其他域,重复的domain会覆盖上一个 */);
+http.unregister('domain') // 取消一个已注册的域
 
 // 创建单个请求实例
 const instance1 = http.get(); // url,[query],[options] /api/user/:userId
 const instance2 = http.post(); // url,[params],[options]
 const instance3 = http.put(); // url,[params],[options]
 const instance4 = http.delete(); // url,[params],[options]
-const instance5 = http.request(); // options
+const instance5 = http.request(); // url,[options]
+instance1.abort() // 终止请求
+instance2.then().cache() // 处理请求
 
 // 链式调用
 const httpChain = http.chain();
@@ -38,9 +40,6 @@ httpChain
   .responseInterceptor() // 针对此请求设置响应拦截器
   .errorInterceptor() // 针对此请求设置异常拦截器
   .request(); // Promise<any> & { abort: () => void } // 执行请求
-
-instance1.abort() // 终止请求
-instance2.then().cache() // 处理请求
 ```
 
 ## 项目开发

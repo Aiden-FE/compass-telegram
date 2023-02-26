@@ -2,17 +2,10 @@
   "name": "@compass-aiden/telegram",
   "version": "0.0.1",
   "description": "基于Ky封装的Http请求模块",
-  "main": "dist/telegram.umd.js",
-  "module": "dist/telegram.es.js",
-  "umd:main": "dist/telegram.umd.js",
-  "jsdelivr": "dist/telegram.umd.js",
-  "unpkg": "dist/telegram.umd.js",
+  "main": "dist/telegram.es.js",
   "types": "types/telegram.es.d.ts",
   "exports": {
-    ".": {
-      "import": "./dist/telegram.es.js",
-      "require": "./dist/telegram.umd.js"
-    },
+    ".": "./dist/telegram.es.js",
     "./dist/": "./dist/"
   },
   "files": [

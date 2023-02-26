@@ -9,7 +9,7 @@ import commonjs from "@rollup/plugin-commonjs";
 import serve from "rollup-plugin-serve";
 import pkg from './package.json'
 
-const isProd = !process.env.ROLLUP_WATCH;
+const isProd = !(process.env.npm_lifecycle_event === 'dev');
 
 /**
  * @description 获取构建插件
@@ -24,7 +24,7 @@ function getPlugins(disablePlugins = []) {
       port: 3000,
       contentBase: '.'
     }),
-    !disablePlugins.includes('nodeResolve') && isProd && nodeResolve({ browser: true }),
+    !disablePlugins.includes('nodeResolve') && nodeResolve({ browser: true }),
     !disablePlugins.includes('commonjs') && isProd && commonjs(),
     !disablePlugins.includes('terser') && isProd && terser(),
     !disablePlugins.includes('cleanup') && isProd && cleanup({ comments: 'none' }),
@@ -67,14 +67,16 @@ function getOutput(
 export default [
   isProd && {
     input: 'src/main.ts',
-    output: getOutput(),
+    output: getOutput({
+      entryFileNames: pkg.main.replace('dist/', ''),
+    }),
     external: getExternal(),
     plugins: getPlugins(),
   },
-  {
+  !isProd && {
     input: 'src/main.ts',
     output: getOutput({
-      entryFileNames: pkg.module.replace('dist/', ''),
+      entryFileNames: pkg.main.replace('dist/', ''),
     }),
     external: getExternal(),
     plugins: getPlugins(),
