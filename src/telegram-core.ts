@@ -1,7 +1,10 @@
 import merge from 'lodash-es/merge';
-import ky from 'ky';
+import cloneDeep from 'lodash-es/cloneDeep';
+import set from 'lodash-es/set';
+import ky, { Hooks as KyHooks } from 'ky';
 import { TelegramCoreOption, TelegramRequestOption, TelegramResponsePromise } from '@/types';
 import { replaceURLParams } from '@/utils';
+import TelegramChain from '@/telegram-chain';
 
 const DEFAULT_DOMAIN = '$$default$$';
 
@@ -17,6 +20,13 @@ export default class TelegramCore {
   constructor(option?: Partial<TelegramCoreOption>) {
     this.defaultOption = merge(this.defaultOption, option || {});
     this.domainMap.set(DEFAULT_DOMAIN, this.defaultOption);
+  }
+
+  /**
+   * @description 使用链式调用
+   */
+  public chain() {
+    return new TelegramChain(this);
   }
 
   /**
@@ -59,12 +69,36 @@ export default class TelegramCore {
     }
     delete cloneOption?.domain;
     delete cloneOption?.pathParams;
-    const defaultOption = this.domainMap.get(domain) || this.domainMap.get(DEFAULT_DOMAIN) || {};
+    let defaultOption = this.domainMap.get(domain) || this.domainMap.get(DEFAULT_DOMAIN) || {};
+    if (cloneOption.disabledOptions?.length) {
+      defaultOption = cloneDeep(defaultOption);
+      cloneOption.disabledOptions.forEach((disabledType) => {
+        let key: keyof KyHooks;
+        switch (disabledType) {
+          case 'defaultRequestHook':
+            key = 'beforeRequest';
+            break;
+          case 'defaultResponseHook':
+            key = 'afterResponse';
+            break;
+          case 'defaultErrorHook':
+            key = 'beforeRetry';
+            break;
+          case 'defaultRetryHook':
+            key = 'beforeError';
+            break;
+          default:
+            throw new TypeError(`错误的Hook Type值, ${disabledType}`);
+        }
+        set(defaultOption, `hooks.${key}`, []);
+      });
+      delete cloneOption.disabledOptions;
+    }
     const tempInstance = ky.create(defaultOption);
     let controller: AbortController | null = new AbortController();
     return {
       ...tempInstance(lastURL, {
-        ...option || {},
+        ...cloneOption || {},
         signal: controller.signal,
       }),
       abort: () => {

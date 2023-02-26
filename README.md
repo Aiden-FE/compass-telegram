@@ -29,18 +29,14 @@ instance1.abort() // 终止请求
 instance1.then().cache() // 处理请求
 
 // 链式调用
-const httpChain = http.chain();
-
-httpChain
-  .get('/api/user/:userId')
+http
+  .chain()
+  .get('/api/user/:userId') // 指定get方法及url
   .path('userId', '0001') // 指定路径数据
   .domain() // 指定域,不使用则默认default
   .config() // 单独处理此请求的配置
-  .with(httpChain.get('/api/user/post'), http.get()) // 合并另外一个或多个请求,被合并的请求是否使用request先行触发均可
   .disable() // 禁用特定选项,可以禁用当前域的 请求拦截器/响应拦截器/
-  .requestInterceptor() // 针对此请求设置请求拦截器
-  .responseInterceptor() // 针对此请求设置响应拦截器
-  .errorInterceptor() // 针对此请求设置异常拦截器
+  .addHooks() // 针对此请求设置请求拦截器
   .request(); // Promise<any> & { abort: () => void } // 执行请求
 ```
 

@@ -23,6 +23,20 @@
     domain: 'lc',
     prefixUrl: ''
   }).abort();
+  http.chain()
+    .get(':userId/post?view=true&t=1')
+    .domain('miss')
+    .path('userId', 'test')
+    .searchParams({ test2: Date.now() })
+    .addHooks('error', () => console.log('error hook: ', ...arguments))
+    .request();
+  http.chain()
+    .post('https://github.com/sindresorhus/ky')
+    .domain('lc')
+    .config({ prefixUrl: '' })
+    .body(JSON.stringify({ test: 'test' }))
+    .request()
+    // .abort();
 </script>
 </body>
 </html>
