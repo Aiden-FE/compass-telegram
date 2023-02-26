@@ -14,5 +14,8 @@ export interface TelegramRequestOption extends KyOptions {
 }
 
 export interface TelegramResponsePromise extends KyResponsePromise {
+  /**
+   * @description 取消本次请求
+   */
   abort: () => void
 }

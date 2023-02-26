@@ -14,8 +14,8 @@ export default class TelegramCore {
     },
   };
 
-  constructor(option: TelegramCoreOption) {
-    this.defaultOption = merge(this.defaultOption, option);
+  constructor(option?: Partial<TelegramCoreOption>) {
+    this.defaultOption = merge(this.defaultOption, option || {});
     this.domainMap.set(DEFAULT_DOMAIN, this.defaultOption);
   }
 
@@ -74,5 +74,79 @@ export default class TelegramCore {
     };
   }
 
-  // public chain() {}
+  public get(
+    url: string,
+    searchParams?: Record<string, string>,
+    option?: Partial<TelegramRequestOption>,
+  ) {
+    const lastOption: Partial<TelegramRequestOption> = merge({}, option, {
+      searchParams,
+      method: 'get',
+    });
+    return this.request(url, lastOption);
+  }
+
+  public head(
+    url: string,
+    searchParams?: Record<string, string>,
+    option?: Partial<TelegramRequestOption>,
+  ) {
+    const lastOption: Partial<TelegramRequestOption> = merge({}, option, {
+      searchParams,
+      method: 'head',
+    });
+    return this.request(url, lastOption);
+  }
+
+  public post(
+    url: string,
+    body?: BodyInit | null,
+    option?: Partial<TelegramRequestOption>,
+  ) {
+    const lastOption: Partial<TelegramRequestOption> = merge({}, option, {
+      body,
+      method: 'post',
+    });
+    return this.request(url, lastOption);
+  }
+
+  public put(
+    url: string,
+    body?: BodyInit | null,
+    option?: Partial<TelegramRequestOption>,
+  ) {
+    const lastOption: Partial<TelegramRequestOption> = merge({}, option, {
+      body,
+      method: 'put',
+    });
+    return this.request(url, lastOption);
+  }
+
+  public patch(
+    url: string,
+    body?: BodyInit | null,
+    option?: Partial<TelegramRequestOption>,
+  ) {
+    const lastOption: Partial<TelegramRequestOption> = merge({}, option, {
+      body,
+      method: 'patch',
+    });
+    return this.request(url, lastOption);
+  }
+
+  public delete(
+    url: string,
+    body?: BodyInit | null,
+    option?: Partial<TelegramRequestOption>,
+  ) {
+    const lastOption: Partial<TelegramRequestOption> = merge({}, option, {
+      body,
+      method: 'delete',
+    });
+    return this.request(url, lastOption);
+  }
 }
+
+// const http = new TelegramCore();
+// http.request('').then().catch();
+// http.request('').abort();

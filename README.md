@@ -19,12 +19,14 @@ http.unregister('domain') // 取消一个已注册的域
 
 // 创建单个请求实例
 const instance1 = http.get(); // url,[query],[options] /api/user/:userId
-const instance2 = http.post(); // url,[params],[options]
-const instance3 = http.put(); // url,[params],[options]
-const instance4 = http.delete(); // url,[params],[options]
-const instance5 = http.request(); // url,[options]
+const instance2 = http.head(); // url,[query],[options]
+const instance3 = http.post(); // url,[params],[options]
+const instance4 = http.put(); // url,[params],[options]
+const instance5 = http.patch(); // url,[params],[options]
+const instance6 = http.delete(); // url,[params],[options]
+const instance7 = http.request(); // url,[options]
 instance1.abort() // 终止请求
-instance2.then().cache() // 处理请求
+instance1.then().cache() // 处理请求
 
 // 链式调用
 const httpChain = http.chain();
