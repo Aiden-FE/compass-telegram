@@ -3,9 +3,7 @@ import set from 'lodash-es/set';
 import isObject from 'lodash-es/isObject';
 import { Hooks as KyHooks } from 'ky';
 import { SearchParamsOption } from 'ky/distribution/types/options';
-import {
-  TelegramChainDisableType, TelegramChainHooks, TelegramRequestOption, TelegramResponsePromise,
-} from '@/types';
+import { TelegramChainDisableType, TelegramChainHooks, TelegramRequestOption, TelegramResponsePromise } from '@/types';
 import type TelegramCore from '@/telegram-core';
 
 export default class TelegramChain {
@@ -13,8 +11,7 @@ export default class TelegramChain {
 
   private option: Partial<TelegramRequestOption> = {};
 
-  constructor(private http: TelegramCore) {
-  }
+  constructor(private http: TelegramCore) {}
 
   /**
    * @description 链末尾执行请求
@@ -28,7 +25,7 @@ export default class TelegramChain {
    * @param type
    * @param hooks
    */
-  public addHooks <HookType extends keyof TelegramChainHooks, Hooks = TelegramChainHooks[HookType]>(
+  public addHooks<HookType extends keyof TelegramChainHooks, Hooks = TelegramChainHooks[HookType]>(
     type: HookType,
     hooks: Hooks,
   ) {
@@ -88,7 +85,7 @@ export default class TelegramChain {
    * @param [isStringify=true] 默认将对象数据进行序列化
    */
   public body(body: BodyInit | Record<any, unknown> | null, isStringify = true) {
-    this.option.body = ((isStringify && isObject) ? JSON.stringify(body) : body) as BodyInit | null;
+    this.option.body = (isStringify && isObject ? JSON.stringify(body) : body) as BodyInit | null;
     return this;
   }
 
