@@ -92,7 +92,7 @@ export default class TelegramCore {
     let controller: AbortController | null = new AbortController();
     return {
       ...tempInstance(lastURL, {
-        ...cloneOption || {},
+        ...(cloneOption || {}),
         signal: controller.signal,
       }),
       abort: () => {
@@ -102,11 +102,7 @@ export default class TelegramCore {
     };
   }
 
-  public get(
-    url: string,
-    searchParams?: Record<string, string>,
-    option?: Partial<TelegramRequestOption>,
-  ) {
+  public get(url: string, searchParams?: Record<string, string>, option?: Partial<TelegramRequestOption>) {
     const lastOption: Partial<TelegramRequestOption> = merge({}, option, {
       searchParams,
       method: 'get',
@@ -114,11 +110,7 @@ export default class TelegramCore {
     return this.request(url, lastOption);
   }
 
-  public head(
-    url: string,
-    searchParams?: Record<string, string>,
-    option?: Partial<TelegramRequestOption>,
-  ) {
+  public head(url: string, searchParams?: Record<string, string>, option?: Partial<TelegramRequestOption>) {
     const lastOption: Partial<TelegramRequestOption> = merge({}, option, {
       searchParams,
       method: 'head',
@@ -126,11 +118,7 @@ export default class TelegramCore {
     return this.request(url, lastOption);
   }
 
-  public post(
-    url: string,
-    body?: BodyInit | null,
-    option?: Partial<TelegramRequestOption>,
-  ) {
+  public post(url: string, body?: BodyInit | null, option?: Partial<TelegramRequestOption>) {
     const lastOption: Partial<TelegramRequestOption> = merge({}, option, {
       body,
       method: 'post',
@@ -138,11 +126,7 @@ export default class TelegramCore {
     return this.request(url, lastOption);
   }
 
-  public put(
-    url: string,
-    body?: BodyInit | null,
-    option?: Partial<TelegramRequestOption>,
-  ) {
+  public put(url: string, body?: BodyInit | null, option?: Partial<TelegramRequestOption>) {
     const lastOption: Partial<TelegramRequestOption> = merge({}, option, {
       body,
       method: 'put',
@@ -150,11 +134,7 @@ export default class TelegramCore {
     return this.request(url, lastOption);
   }
 
-  public patch(
-    url: string,
-    body?: BodyInit | null,
-    option?: Partial<TelegramRequestOption>,
-  ) {
+  public patch(url: string, body?: BodyInit | null, option?: Partial<TelegramRequestOption>) {
     const lastOption: Partial<TelegramRequestOption> = merge({}, option, {
       body,
       method: 'patch',
@@ -162,11 +142,7 @@ export default class TelegramCore {
     return this.request(url, lastOption);
   }
 
-  public delete(
-    url: string,
-    body?: BodyInit | null,
-    option?: Partial<TelegramRequestOption>,
-  ) {
+  public delete(url: string, body?: BodyInit | null, option?: Partial<TelegramRequestOption>) {
     const lastOption: Partial<TelegramRequestOption> = merge({}, option, {
       body,
       method: 'delete',
