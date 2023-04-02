@@ -86,4 +86,17 @@ export default [
     external: getExternal(),
     plugins: getPlugins(),
   },
+  isProd && {
+    input: 'src/main.ts',
+    output: getOutput({
+      format: 'umd',
+      file: pkg.umd,
+      name: 'Telegram',
+      dir: undefined,
+      chunkFileNames: undefined,
+      entryFileNames: undefined,
+    }),
+    external: getExternal(),
+    plugins: getPlugins(),
+  },
 ].filter(item => !!item);
