@@ -1,7 +1,7 @@
 import merge from 'lodash-es/merge';
 import cloneDeep from 'lodash-es/cloneDeep';
 import set from 'lodash-es/set';
-import ky, { Hooks as KyHooks } from 'ky';
+import ky, { Hooks as KyHooks } from 'ky-universal';
 import { TelegramCoreOption, TelegramRequestOption, TelegramResponsePromise } from '@/types';
 import { replaceURLParams } from '@/utils';
 import TelegramChain from '@/telegram-chain';
@@ -15,6 +15,7 @@ export default class TelegramCore {
     headers: {
       'content-type': 'application/json',
     },
+    retry: 0,
   };
 
   constructor(option?: Partial<TelegramCoreOption>) {

@@ -1,7 +1,7 @@
 import merge from 'lodash-es/merge';
 import set from 'lodash-es/set';
 import isObject from 'lodash-es/isObject';
-import { Hooks as KyHooks } from 'ky';
+import { Hooks as KyHooks, RetryOptions } from 'ky-universal';
 import { SearchParamsOption } from 'ky/distribution/types/options';
 import { TelegramChainDisableType, TelegramChainHooks, TelegramRequestOption, TelegramResponsePromise } from '@/types';
 import type TelegramCore from '@/telegram-core';
@@ -18,6 +18,24 @@ export default class TelegramChain {
    */
   public request(): TelegramResponsePromise {
     return this.http.request(this.url, this.option);
+  }
+
+  /**
+   * @description 设置重试
+   * @param option
+   */
+  public retry(option: RetryOptions | number) {
+    this.option.retry = option;
+    return this;
+  }
+
+  /**
+   * @description 添加请求头信息
+   * @param headers
+   */
+  public addHeaders(headers: { [key: string]: string }) {
+    this.option.headers = merge({}, this.option.headers, headers);
+    return this;
   }
 
   /**
@@ -85,7 +103,7 @@ export default class TelegramChain {
    * @param [isStringify=true] 默认将对象数据进行序列化
    */
   public body(body: BodyInit | Record<any, unknown> | null, isStringify = true) {
-    this.option.body = (isStringify && isObject ? JSON.stringify(body) : body) as BodyInit | null;
+    this.option.body = (isStringify && isObject(body) ? JSON.stringify(body) : body) as BodyInit | null;
     return this;
   }
 

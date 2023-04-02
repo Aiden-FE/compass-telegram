@@ -1,4 +1,4 @@
-import { Options as KyOptions, ResponsePromise as KyResponsePromise } from 'ky';
+import { Options as KyOptions, ResponsePromise as KyResponsePromise } from 'ky-universal';
 import { TelegramChainDisableType } from '@/types/telegram-chain.type';
 
 export interface TelegramCoreOption

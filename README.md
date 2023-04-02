@@ -107,6 +107,14 @@ http
 
 ### <div id="TelegramChain">Telegram.chain() 链式返回的链条方法</div>
 
+#### retry(option: RetryOptions | number)
+
+配置重试
+
+#### addHeaders(headers: { [key:string]: string})
+
+设置请求头
+
 #### addHooks(hookType, hooks)
 
 针对本次请求设置hooks
