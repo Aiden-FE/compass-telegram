@@ -4,6 +4,7 @@
   "description": "基于Ky封装的Http请求模块",
   "main": "dist/telegram.es.js",
   "types": "types/telegram.es.d.ts",
+  "type": "module",
   "exports": {
     ".": "./dist/telegram.es.js",
     "./dist/": "./dist/"
@@ -67,6 +68,7 @@
   },
   "dependencies": {
     "ky": "^0.33.2",
+    "ky-universal": "^0.11.0",
     "lodash-es": "^4.17.21"
   }
 }

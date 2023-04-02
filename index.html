@@ -26,7 +26,12 @@
   http.chain()
     .get(':userId/post?view=true&t=1')
     .domain('miss')
-    .path('userId', 'test')
+    .path('userId', 'test233')
+    .addHeaders({
+      'traceId': 'test234',
+      'content-type': 'application/stream',
+    })
+    .retry(3)
     .searchParams({ test2: Date.now() })
     .addHooks('error', () => console.log('error hook: ', ...arguments))
     .request();
