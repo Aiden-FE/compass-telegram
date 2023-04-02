@@ -65,15 +65,7 @@ function getOutput(
 }
 
 export default [
-  isProd && {
-    input: 'src/main.ts',
-    output: getOutput({
-      entryFileNames: pkg.main.replace('dist/', ''),
-    }),
-    external: getExternal(),
-    plugins: getPlugins(),
-  },
-  !isProd && {
+  {
     input: 'src/main.ts',
     output: getOutput({
       entryFileNames: pkg.main.replace('dist/', ''),
@@ -83,5 +75,15 @@ export default [
     watch: {
       include: ['src/**', 'index.html'],
     },
+  },
+  isProd && {
+    input: 'src/main.ts',
+    output: getOutput({
+      exports: 'auto',
+      format: 'cjs',
+      entryFileNames: pkg.commonjs.replace('dist/', ''),
+    }),
+    external: getExternal(),
+    plugins: getPlugins(),
   },
 ].filter(item => !!item);
