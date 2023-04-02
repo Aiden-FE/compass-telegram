@@ -4,7 +4,6 @@
   "description": "基于Ky封装的Http请求模块",
   "main": "dist/telegram.es.js",
   "types": "types/telegram.es.d.ts",
-  "type": "module",
   "exports": {
     ".": "./dist/telegram.es.js",
     "./dist/": "./dist/"
@@ -33,7 +32,7 @@
     "build": "npm run clean && rollup -c rollup.config.js",
     "lint": "eslint src --ext .ts,.js --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
-    "test": "jest --coverage",
+    "test": "jest --coverage --passWithNoTests",
     "prepublish": "npm run lint && npm run build",
     "clean": "rimraf dist && rimraf types && rimraf coverage"
   },
