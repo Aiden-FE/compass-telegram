@@ -1,18 +1,23 @@
 {
   "name": "@compass-aiden/telegram",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "基于Ky封装的Http请求模块",
-  "main": "dist/telegram.es.js",
-  "commonjs": "dist/telegram.cjs.js",
+  "main": "dist/telegram.js",
+  "commonjs": "dist/telegram.umd.js",
   "umd": "dist/telegram.umd.js",
-  "types": "types/telegram.es.d.ts",
+  "jsdelivr": "dist/telegram.umd.js",
+  "unpkg": "dist/telegram.umd.js",
   "exports": {
     ".": {
-      "default": "./dist/telegram.umd.js",
-      "import": "./dist/telegram.es.js",
-      "require": "./dist/telegram.cjs.js"
+      "types": {
+        "default": "./types/telegram.d.ts",
+        "require": "./types/telegram.umd.d.ts"
+      },
+      "import": "./dist/telegram.js",
+      "require": "./dist/telegram.umd.js"
     },
-    "./dist/*": "./dist/*"
+    "./dist/*": "./dist/*",
+    "./types/*": "./types/*"
   },
   "files": [
     "dist",
@@ -43,7 +48,7 @@
     "clean": "rimraf dist && rimraf types && rimraf coverage"
   },
   "devDependencies": {
-    "@compass-aiden/eslint-config": "^1.2.1",
+    "@compass-aiden/eslint-config": "^1.5.3",
     "@rollup/plugin-commonjs": "~23.0.7",
     "@rollup/plugin-json": "~5.0.2",
     "@rollup/plugin-node-resolve": "~15.0.1",
