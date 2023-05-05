@@ -92,6 +92,7 @@ export default [
       dir: undefined,
       chunkFileNames: undefined,
       entryFileNames: undefined,
+      exports: 'auto',
     }),
     external: getExternal(),
     plugins: getPlugins(undefined, {
@@ -99,16 +100,17 @@ export default [
     }),
   },
   // commonjs bundle
-  {
-    input: 'src/main.ts',
-    output: getOutput({
-      format: 'cjs',
-      entryFileNames: pkg.commonjs.replace('dist/', ''),
-      exports: 'auto',
-    }),
-    external: getExternal(),
-    plugins: getPlugins(undefined, {
-      nodeResolve: { browser: false, exportConditions: ['node'] },
-    }),
-  },
+  // {
+  //   input: 'src/main.ts',
+  //   output: getOutput({
+  //     format: 'cjs',
+  //     chunkFileNames: undefined,
+  //     entryFileNames: pkg.commonjs.replace('dist/', ''),
+  //     exports: 'auto',
+  //   }),
+  //   external: getExternal(),
+  //   plugins: getPlugins(undefined, {
+  //     nodeResolve: { browser: false, exportConditions: ['node'] },
+  //   }),
+  // },
 ].filter((item) => !!item);
