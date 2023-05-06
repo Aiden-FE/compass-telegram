@@ -6,7 +6,10 @@ module.exports = {
     es6: true,
   },
   parserOptions: {
-    project: './tsconfig.json',
+    project: [
+      './tsconfig.json',
+      './tsconfig.node.json',
+    ]
   },
   plugins: ["prettier"],
   extends: [
