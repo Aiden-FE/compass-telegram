@@ -41,7 +41,7 @@
   "scripts": {
     "dev": "rollup -w -c rollup.config.js",
     "build": "npm run clean && rollup -c rollup.config.js",
-    "lint": "eslint src --ext .ts,.js --fix --ignore-path .gitignore",
+    "lint": "eslint src --ext .ts,.js --fix",
     "format": "prettier --write src/",
     "test": "jest --coverage --passWithNoTests",
     "prepublish": "npm run lint && npm run build",
