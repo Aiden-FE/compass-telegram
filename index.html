@@ -6,42 +6,11 @@
 <body>
 <p>Hello World</p>
 
-<script type="module">
-  import Telegram from '/dist/telegram.es.js'
-  const http = new Telegram({
-    prefixUrl: '/api'
-  });
-  http.register('lc', {
-    prefixUrl: '/lc/api'
-  });
-  http.request(':userId/post?view=true&t=1', {
-    domain: 'miss',
-    pathParams: {userId:'test'},
-    searchParams: { t: Date.now() }
-  });
-  http.request('https://github.com/sindresorhus/ky', {
-    domain: 'lc',
-    prefixUrl: ''
-  }).abort();
-  http.chain()
-    .get(':userId/post?view=true&t=1')
-    .domain('miss')
-    .path('userId', 'test233')
-    .addHeaders({
-      'traceId': 'test234',
-      'content-type': 'application/stream',
-    })
-    .retry(3)
-    .searchParams({ test2: Date.now() })
-    .addHooks('error', () => console.log('error hook: ', ...arguments))
-    .request();
-  http.chain()
-    .post('https://github.com/sindresorhus/ky')
-    .domain('lc')
-    .config({ prefixUrl: '' })
-    .body(JSON.stringify({ test: 'test' }))
-    .request()
-    // .abort();
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="/dist/main.umd.js"></script>
+<script>
+  const api = new Telegram();
+  console.log('Api instance: ', api);
 </script>
 </body>
 </html>

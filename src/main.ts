@@ -1,5 +1,3 @@
-import Telegram from './telegram-core';
-
-export { Telegram };
+import Telegram from '@/telegram-core';
 
 export default Telegram;

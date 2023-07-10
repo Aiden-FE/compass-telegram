@@ -30,7 +30,7 @@ function getPlugins(disablePlugins = [], options = {}) {
         },
       ),
     // 如果目标是node环境,需要提供选项{ exportConditions: ["node"] }以支持构建
-    !disablePlugins.includes('nodeResolve') && isProd && nodeResolve(options.nodeResolve || undefined),
+    !disablePlugins.includes('nodeResolve') && nodeResolve(options.nodeResolve || undefined),
     !disablePlugins.includes('commonjs') && isProd && commonjs(options.commonjs || undefined),
     !disablePlugins.includes('terser') && isProd && terser(options.terser || undefined),
     !disablePlugins.includes('cleanup') && isProd && cleanup(options.cleanup || { comments: 'none' }),
@@ -75,46 +75,45 @@ function getOutput(options = {}) {
 
 export default [
   // esm bundle
-  {
+  isProd && {
     input: 'src/main.ts',
-    output: getOutput({
-      entryFileNames: pkg.module.replace('dist/', ''),
-    }),
-    external: getExternal(),
+    output: getOutput(),
+    external: getExternal(Object.keys(pkg.peerDependencies)),
     plugins: getPlugins(),
     watch: {
       include: ['src/**', 'index.html'],
     },
   },
   // umd bundle
-  isProd && {
+  {
     input: 'src/main.ts',
     output: getOutput({
       format: 'umd',
       file: pkg.main,
-      name: 'Telegram', // Set your library name.
+      name: 'Telegram' || pkg.name, // Set your library name.
       dir: undefined,
       chunkFileNames: undefined,
       entryFileNames: undefined,
-      exports: 'named',
+      exports: 'auto',
+      globals: {
+        axios: 'axios',
+      },
     }),
-    external: getExternal(),
+    external: getExternal(Object.keys(pkg.peerDependencies)),
     plugins: getPlugins(undefined, {
       nodeResolve: { browser: true },
     }),
   },
   // commonjs bundle
-  // {
-  //   input: 'src/main.ts',
-  //   output: getOutput({
-  //     format: 'cjs',
-  //     chunkFileNames: undefined,
-  //     entryFileNames: pkg.commonjs.replace('dist/', ''),
-  //     exports: 'auto',
-  //   }),
-  //   external: getExternal(),
-  //   plugins: getPlugins(undefined, {
-  //     nodeResolve: { browser: false, exportConditions: ['node'] },
-  //   }),
-  // },
+  isProd && {
+    input: 'src/main.ts',
+    output: getOutput({
+      format: 'cjs',
+      exports: 'auto',
+    }),
+    external: getExternal(Object.keys(pkg.peerDependencies)),
+    plugins: getPlugins(undefined, {
+      nodeResolve: { browser: false, exportConditions: ['node'] },
+    }),
+  },
 ].filter((item) => !!item);
