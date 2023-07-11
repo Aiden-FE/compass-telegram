@@ -1,11 +1,20 @@
-import { AxiosResponse, CreateAxiosDefaults, InternalAxiosRequestConfig } from 'axios';
+import { AxiosResponse, CreateAxiosDefaults, InternalAxiosRequestConfig, AxiosRequestConfig } from 'axios';
 
 /** 类型代理,隔绝对底层实现的访问 */
 export {
   default as HttpTelegram,
   AxiosInstance as HttpTelegramInstance,
-  AxiosRequestConfig as HttpTelegramReqConfig,
+  AxiosResponse as HttpTelegramResponse
 } from 'axios';
+
+export interface HttpTelegramReqConfig extends AxiosRequestConfig {
+  domain?: string | symbol;
+  retry?: {
+    max: number;
+    delay: number;
+  };
+  paths?: Record<string, string>;
+}
 
 export interface TelegramConstructor {
   /**

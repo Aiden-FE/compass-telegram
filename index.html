@@ -9,8 +9,63 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="/dist/main.umd.js"></script>
 <script>
-  const api = new Telegram();
+  const api = new Telegram()
+          .register('b', {
+            headers: {
+              Authorization: 'b',
+            },
+          });
   console.log('Api instance: ', api);
+
+  // 使用底层API直接请求
+  api.request({
+    url: 'https://api.qqsuu.cn/api/dm-ipquery',
+  }).then((result) => {
+    console.log('使用底层API直接请求: ', result);
+  });
+  // 请求取消测试
+  const demo2 = api.request({
+    url: 'https://api.qqsuu.cn/api/dm-xjj?type=json',
+  });
+  demo2.then((result) => {
+    console.log('请求取消测试: ', result);
+  })
+  demo2.abort();
+  // 测试使用b域内的接口
+  api.request({
+    url: 'https://api.qqsuu.cn/api/dm-ipquery',
+    domain: 'b',
+  }).then((result) => {
+    console.log('测试使用b域内的接口: ', result);
+  });
+  // 使用链式请求
+  api.chain()
+    .get('https://api.qqsuu.cn/api/dm-ipquery')
+    .request()
+    .then((result) => {
+      console.log('使用链式请求: ', result);
+    });
+  // 使用链式请求配置路径参数,url查询参数,body参数及取消请求
+  const demo3 = api.chain()
+    .get('https://api.qqsuu.cn/api/:test')
+    .path('test', 'dm-xjj')
+    .searchParams({ type: 'json2' })
+    .body({ test: 'test' })
+    .request();
+  demo3.then((result) => {
+    console.log('使用链式请求配置路径参数,url查询参数,body参数及取消请求: ', result);
+  });
+  demo3.abort();
+  // 使用链式请求设置请求体
+  api.chain()
+    .post('https://api.qqsuu.cn/api/dm-xjj')
+    .body({ test: 'test' })
+    .request()
+    .abort();
+  // FIXME: 拦截器演示
+  // FIXME: retry演示
+  // FIXME: 跳过拦截器演示
+  // FIXME: 请求体编码
 </script>
 </body>
 </html>
