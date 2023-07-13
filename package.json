@@ -1,6 +1,6 @@
 {
   "name": "@compass-aiden/telegram",
-  "version": "0.0.1",
+  "version": "2.0.0",
   "description": "基于 Axios 封装的Http请求模块",
   "main": "dist/main.umd.js",
   "jsdelivr": "dist/main.umd.js",
