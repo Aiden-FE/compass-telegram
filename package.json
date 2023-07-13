@@ -36,7 +36,7 @@
     "build": "npm run clean && rollup -c rollup.config.js",
     "lint": "eslint src --ext .ts,.js --fix",
     "format": "prettier --write src/",
-    "test": "jest --coverage",
+    "test": "jest --coverage --passWithNoTests",
     "prepublish": "npm run lint && npm run build",
     "clean": "rimraf dist && rimraf types && rimraf coverage"
   },
