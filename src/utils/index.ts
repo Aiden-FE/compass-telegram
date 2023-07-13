@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/prefer-default-export
 export function replaceURLParams(url: string, params: Record<string, string>) {
   return Object.keys(params).reduce((lastURL, currentKey) => {
     const currentValue = params[currentKey];

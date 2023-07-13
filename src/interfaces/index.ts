@@ -1,32 +1,21 @@
-import { AxiosResponse, CreateAxiosDefaults, InternalAxiosRequestConfig, AxiosRequestConfig } from 'axios';
+import { AxiosRequestConfig } from 'axios';
+import HttpTelegramRetry, { type IAxiosRetryConfig } from 'axios-retry';
 
 /** 类型代理,隔绝对底层实现的访问 */
 export {
   default as HttpTelegram,
   AxiosInstance as HttpTelegramInstance,
-  AxiosResponse as HttpTelegramResponse
+  AxiosResponse as HttpTelegramResponse,
 } from 'axios';
+
+export { HttpTelegramRetry };
 
 export interface HttpTelegramReqConfig extends AxiosRequestConfig {
   domain?: string | symbol;
-  retry?: {
-    max: number;
-    delay: number;
-  };
+  'axios-retry'?: IAxiosRetryConfig;
   paths?: Record<string, string>;
+  /** 自定义元数据 */
+  customMeta?: Record<string, unknown>;
 }
 
-export interface TelegramConstructor {
-  /**
-   * @default { timeout: 1000 * 10, headers: { 'Content-Type': 'application/json', }, }
-   */
-  config?: CreateAxiosDefaults;
-  interceptors?: {
-    request?:
-      | ((value: InternalAxiosRequestConfig) => InternalAxiosRequestConfig | Promise<InternalAxiosRequestConfig>)
-      | null;
-    requestError?: ((error: any) => any) | null;
-    response?: ((value: AxiosResponse) => AxiosResponse | Promise<AxiosResponse>) | null;
-    responseError?: ((error: any) => any) | null;
-  };
-}
+export interface TelegramConstructor extends HttpTelegramReqConfig {}

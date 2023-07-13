@@ -1,27 +1,20 @@
 import merge from 'lodash-es/merge';
 import {
   HttpTelegram,
+  HttpTelegramRetry,
   HttpTelegramInstance,
   HttpTelegramReqConfig,
   HttpTelegramResponse,
-  TelegramConstructor
+  TelegramConstructor,
 } from '@/interfaces';
-import TelegramChain from "@/telegram-chain";
-import {replaceURLParams} from "@/utils";
+import TelegramChain from '@/telegram-chain';
+import { replaceURLParams } from '@/utils';
 
 const DEFAULT_DOMAIN = Symbol('default');
 
-/**
- * @todo
- *  1. 请求体编码处理
- *  2. 请求取消
- *  3. 请求domain隔离
- *  4. 请求自动重试
- *  5. 支持跳过拦截器
- *  6. chain链式调用支持
- */
 export default class TelegramCore {
   private domainMap = new Map<string | symbol, HttpTelegramReqConfig>();
+
   private vm: HttpTelegramInstance;
 
   constructor(option?: TelegramConstructor) {
@@ -29,21 +22,15 @@ export default class TelegramCore {
       {
         timeout: 1000 * 10,
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json;charset=utf-8',
         },
+        responseType: 'json',
       },
       option || {},
     );
     this.vm = HttpTelegram.create(defaultOption);
+    HttpTelegramRetry(this.vm);
     this.domainMap.set(DEFAULT_DOMAIN, defaultOption);
-
-    /** 应用拦截器 */
-    if (option?.interceptors?.request) {
-      this.vm.interceptors.request.use(option.interceptors.request, option.interceptors.requestError);
-    }
-    if (option?.interceptors?.response) {
-      this.vm.interceptors.response.use(option.interceptors.response, option.interceptors.responseError);
-    }
   }
 
   chain() {
@@ -69,10 +56,14 @@ export default class TelegramCore {
 
     // @ts-ignore
     const controller = new AbortController();
-    const cloneConfig = merge({
-      signal: controller.signal,
-      method: 'get',
-    } as HttpTelegramReqConfig, defaultConfig, config)
+    const cloneConfig: HttpTelegramReqConfig = merge(
+      {
+        signal: controller.signal,
+        method: 'get',
+      },
+      defaultConfig,
+      config,
+    );
 
     // 替换路径path参数
     if (cloneConfig.paths) {

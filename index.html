@@ -14,6 +14,20 @@
             headers: {
               Authorization: 'b',
             },
+          })
+          .register('interceptor', {
+            baseURL: 'https://api.qqsuu.cn/api',
+            transformRequest: (data, headers) => {
+              console.log('Req: ', data, headers);
+              return data;
+            },
+            transformResponse: function (...args) {
+              console.log('Response: ', ...args, this);
+              if (this.customMeta.skipResponseInterceptor) {
+                console.log('接收到跳过拦截器的配置');
+              }
+              return args[0];
+            }
           });
   console.log('Api instance: ', api);
 
@@ -62,10 +76,39 @@
     .body({ test: 'test' })
     .request()
     .abort();
-  // FIXME: 拦截器演示
-  // FIXME: retry演示
-  // FIXME: 跳过拦截器演示
-  // FIXME: 请求体编码
+  // 拦截器演示
+  api.chain()
+    .domain('interceptor')
+    .post('dm-comment')
+    .request()
+    .then(result => console.log('拦截器演示', result));
+  // 跳过拦截器演示
+  api.chain()
+    .domain('interceptor')
+    .post('dm-comment')
+    .config({ customMeta: { skipResponseInterceptor: true } })
+    .request()
+    .then(result => console.log('拦截器演示', result));
+  // retry演示
+  api.chain()
+    .post('https://api.qqsuu.cn/api/retry')
+    .retry({
+      retries: 3,
+      // 自定义延时
+      retryDelay: (count) => 1000 * count,
+    })
+    .request()
+    .then(result => console.log('retry演示', result));
+  // 请求体编码
+  // api.chain()
+  //   .post('test')
+  //   .config({
+  //     paramsSerializer: (params) => {
+  //       return Qs.stringify(params, {arrayFormat: 'brackets'})
+  //     },
+  //   })
+  //   .request()
+  //   .then(result => console.log('请求体编码演示', result));
 </script>
 </body>
 </html>

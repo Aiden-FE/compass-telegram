@@ -44,6 +44,7 @@
     "axios": ">=1.4.0"
   },
   "dependencies": {
+    "axios-retry": "^3.5.1",
     "lodash-es": "^4.17.21"
   },
   "devDependencies": {
@@ -73,6 +74,7 @@
     "rollup-plugin-serve": "~2.0.2",
     "rollup-plugin-summary": "~1.4.3",
     "rollup-plugin-ts": "~3.0.2",
+    "rollup-plugin-visualizer": "^5.9.2",
     "ts-jest": "~29.0.5",
     "typescript": "~4.8.4"
   }

@@ -7,13 +7,14 @@ import summary from 'rollup-plugin-summary';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import serve from 'rollup-plugin-serve';
+import { visualizer } from 'rollup-plugin-visualizer';
 import pkg from './package.json';
 
 const isProd = !process.env.ROLLUP_WATCH;
 
 /**
  * @description 获取构建插件
- * @param {('serve'|'nodeResolve'|'commonjs'|'compiler'|'terser'|'cleanup'|'summary')[]} disablePlugins 待禁用的插件
+ * @param {('serve'|'nodeResolve'|'commonjs'|'compiler'|'terser'|'cleanup'|'summary'|'visualizer')[]} disablePlugins 待禁用的插件
  * @param {{[key: string]: object}} options
  * @return {(Plugin|false|{generateBundle: generateBundle, name: string})[]}
  */
@@ -45,6 +46,7 @@ function getPlugins(disablePlugins = [], options = {}) {
           showMinifiedSize: true,
         },
       ),
+    !disablePlugins.includes('visualizer') && isProd && visualizer(),
   ];
 }
 
@@ -74,16 +76,6 @@ function getOutput(options = {}) {
 }
 
 export default [
-  // esm bundle
-  isProd && {
-    input: 'src/main.ts',
-    output: getOutput(),
-    external: getExternal(Object.keys(pkg.peerDependencies)),
-    plugins: getPlugins(),
-    watch: {
-      include: ['src/**', 'index.html'],
-    },
-  },
   // umd bundle
   {
     input: 'src/main.ts',
@@ -115,5 +107,15 @@ export default [
     plugins: getPlugins(undefined, {
       nodeResolve: { browser: false, exportConditions: ['node'] },
     }),
+  },
+  // esm bundle
+  isProd && {
+    input: 'src/main.ts',
+    output: getOutput(),
+    external: getExternal(Object.keys(pkg.peerDependencies)),
+    plugins: getPlugins(),
+    watch: {
+      include: ['src/**', 'index.html'],
+    },
   },
 ].filter((item) => !!item);
