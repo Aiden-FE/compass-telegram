@@ -127,7 +127,8 @@ Thumbs.db
 # misc
 package-lock.json
 yarn.lock
-pnpm-lock.yaml
+#pnpm-lock.yaml
+rush.lock
 
 # compiled output
 tmp
@@ -141,3 +142,5 @@ bazel-out
 # profiling files
 chrome-profiler-events*.json
 speed-measure-plugin*.json
+
+stats.html

@@ -7,13 +7,14 @@ import summary from 'rollup-plugin-summary';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import serve from 'rollup-plugin-serve';
+import { visualizer } from 'rollup-plugin-visualizer';
 import pkg from './package.json';
 
 const isProd = !process.env.ROLLUP_WATCH;
 
 /**
  * @description 获取构建插件
- * @param {('serve'|'nodeResolve'|'commonjs'|'compiler'|'terser'|'cleanup'|'summary')[]} disablePlugins 待禁用的插件
+ * @param {('serve'|'nodeResolve'|'commonjs'|'compiler'|'terser'|'cleanup'|'summary'|'visualizer')[]} disablePlugins 待禁用的插件
  * @param {{[key: string]: object}} options
  * @return {(Plugin|false|{generateBundle: generateBundle, name: string})[]}
  */
@@ -30,7 +31,7 @@ function getPlugins(disablePlugins = [], options = {}) {
         },
       ),
     // 如果目标是node环境,需要提供选项{ exportConditions: ["node"] }以支持构建
-    !disablePlugins.includes('nodeResolve') && isProd && nodeResolve(options.nodeResolve || undefined),
+    !disablePlugins.includes('nodeResolve') && nodeResolve(options.nodeResolve || undefined),
     !disablePlugins.includes('commonjs') && isProd && commonjs(options.commonjs || undefined),
     !disablePlugins.includes('terser') && isProd && terser(options.terser || undefined),
     !disablePlugins.includes('cleanup') && isProd && cleanup(options.cleanup || { comments: 'none' }),
@@ -45,6 +46,7 @@ function getPlugins(disablePlugins = [], options = {}) {
           showMinifiedSize: true,
         },
       ),
+    !disablePlugins.includes('visualizer') && isProd && visualizer(),
   ];
 }
 
@@ -74,47 +76,46 @@ function getOutput(options = {}) {
 }
 
 export default [
-  // esm bundle
-  {
-    input: 'src/main.ts',
-    output: getOutput({
-      entryFileNames: pkg.module.replace('dist/', ''),
-    }),
-    external: getExternal(),
-    plugins: getPlugins(),
-    watch: {
-      include: ['src/**', 'index.html'],
-    },
-  },
   // umd bundle
-  isProd && {
+  {
     input: 'src/main.ts',
     output: getOutput({
       format: 'umd',
       file: pkg.main,
-      name: 'Telegram', // Set your library name.
+      name: 'Telegram' || pkg.name, // Set your library name.
       dir: undefined,
       chunkFileNames: undefined,
       entryFileNames: undefined,
-      exports: 'named',
+      exports: 'auto',
+      globals: {
+        axios: 'axios',
+      },
     }),
-    external: getExternal(),
+    external: getExternal(Object.keys(pkg.peerDependencies)),
     plugins: getPlugins(undefined, {
       nodeResolve: { browser: true },
     }),
   },
   // commonjs bundle
-  // {
-  //   input: 'src/main.ts',
-  //   output: getOutput({
-  //     format: 'cjs',
-  //     chunkFileNames: undefined,
-  //     entryFileNames: pkg.commonjs.replace('dist/', ''),
-  //     exports: 'auto',
-  //   }),
-  //   external: getExternal(),
-  //   plugins: getPlugins(undefined, {
-  //     nodeResolve: { browser: false, exportConditions: ['node'] },
-  //   }),
-  // },
+  isProd && {
+    input: 'src/main.ts',
+    output: getOutput({
+      format: 'cjs',
+      exports: 'auto',
+    }),
+    external: getExternal(Object.keys(pkg.peerDependencies)),
+    plugins: getPlugins(undefined, {
+      nodeResolve: { browser: false, exportConditions: ['node'] },
+    }),
+  },
+  // esm bundle
+  isProd && {
+    input: 'src/main.ts',
+    output: getOutput(),
+    external: getExternal(Object.keys(pkg.peerDependencies)),
+    plugins: getPlugins(),
+    watch: {
+      include: ['src/**', 'index.html'],
+    },
+  },
 ].filter((item) => !!item);

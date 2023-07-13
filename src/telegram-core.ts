@@ -1,153 +1,79 @@
 import merge from 'lodash-es/merge';
-import cloneDeep from 'lodash-es/cloneDeep';
-import set from 'lodash-es/set';
-import ky, { Hooks as KyHooks } from 'ky-universal';
-import { TelegramCoreOption, TelegramRequestOption, TelegramResponsePromise } from '@/types';
-import { replaceURLParams } from '@/utils';
+import {
+  HttpTelegram,
+  HttpTelegramRetry,
+  HttpTelegramInstance,
+  HttpTelegramReqConfig,
+  HttpTelegramResponse,
+  TelegramConstructor,
+} from '@/interfaces';
 import TelegramChain from '@/telegram-chain';
+import { replaceURLParams } from '@/utils';
 
 const DEFAULT_DOMAIN = Symbol('default');
 
 export default class TelegramCore {
-  private domainMap = new Map<string | symbol, TelegramCoreOption>();
+  private domainMap = new Map<string | symbol, HttpTelegramReqConfig>();
 
-  private readonly defaultOption: TelegramCoreOption = {
-    headers: {
-      'content-type': 'application/json',
-    },
-    retry: 0,
-  };
+  private vm: HttpTelegramInstance;
 
-  constructor(option?: Partial<TelegramCoreOption>) {
-    this.defaultOption = merge(this.defaultOption, option || {});
-    this.domainMap.set(DEFAULT_DOMAIN, this.defaultOption);
+  constructor(option?: TelegramConstructor) {
+    const defaultOption: HttpTelegramReqConfig = merge(
+      {
+        timeout: 1000 * 10,
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8',
+        },
+        responseType: 'json',
+      },
+      option || {},
+    );
+    this.vm = HttpTelegram.create(defaultOption);
+    HttpTelegramRetry(this.vm);
+    this.domainMap.set(DEFAULT_DOMAIN, defaultOption);
   }
 
-  /**
-   * @description 使用链式调用
-   */
-  public chain() {
-    return new TelegramChain(this);
+  chain() {
+    return new TelegramChain(this.request.bind(this));
   }
 
-  /**
-   * @description 注册一个业务域配置
-   * @param domain
-   * @param option
-   */
-  public register(domain: string | symbol, option: TelegramCoreOption) {
+  register(domain: string | symbol, option: HttpTelegramReqConfig) {
     this.domainMap.set(domain, option);
     return this;
   }
 
-  /**
-   * @description 取消注册一个业务域
-   * @param domain
-   */
-  public unregister(domain: string | symbol) {
+  unregister(domain: string | symbol) {
     this.domainMap.delete(domain);
     return this;
   }
 
-  /**
-   * @description 发出请求,返回一个Promise及abort方法用来取消请求
-   * @param url
-   * @param option
-   */
-  public request(url: string, option?: Partial<TelegramRequestOption>): TelegramResponsePromise {
-    const cloneOption = { ...option };
-    let lastURL = url;
-    const domain = cloneOption?.domain || DEFAULT_DOMAIN;
+  request<Result = any>(config: HttpTelegramReqConfig): Promise<HttpTelegramResponse<Result>> & { abort: Function } {
+    let defaultConfig: HttpTelegramReqConfig | undefined;
+    // 设置domain
+    if (config.domain) {
+      defaultConfig = this.domainMap.get(config.domain);
+    }
 
-    if (cloneOption?.pathParams) {
-      lastURL = replaceURLParams(lastURL, cloneOption.pathParams);
-    }
-    delete cloneOption?.domain;
-    delete cloneOption?.pathParams;
-    let defaultOption = this.domainMap.get(domain) || this.domainMap.get(DEFAULT_DOMAIN) || {};
-    if (cloneOption.disabledOptions?.length) {
-      defaultOption = cloneDeep(defaultOption);
-      cloneOption.disabledOptions.forEach((disabledType) => {
-        let key: keyof KyHooks;
-        switch (disabledType) {
-          case 'defaultRequestHook':
-            key = 'beforeRequest';
-            break;
-          case 'defaultResponseHook':
-            key = 'afterResponse';
-            break;
-          case 'defaultErrorHook':
-            key = 'beforeRetry';
-            break;
-          case 'defaultRetryHook':
-            key = 'beforeError';
-            break;
-          default:
-            throw new TypeError(`错误的Hook Type值, ${disabledType}`);
-        }
-        set(defaultOption, `hooks.${key}`, []);
-      });
-      delete cloneOption.disabledOptions;
-    }
-    const tempInstance = ky.create(defaultOption);
-    let controller: AbortController | null = new AbortController();
-    return {
-      ...tempInstance(lastURL, {
-        ...(cloneOption || {}),
+    // @ts-ignore
+    const controller = new AbortController();
+    const cloneConfig: HttpTelegramReqConfig = merge(
+      {
         signal: controller.signal,
-      }),
-      abort: () => {
-        controller?.abort(controller.signal.reason);
-        controller = null; // 释放引用关系
+        method: 'get',
       },
-    };
-  }
+      defaultConfig,
+      config,
+    );
 
-  public get(url: string, searchParams?: Record<string, string>, option?: Partial<TelegramRequestOption>) {
-    const lastOption: Partial<TelegramRequestOption> = merge({}, option, {
-      searchParams,
-      method: 'get',
-    });
-    return this.request(url, lastOption);
-  }
+    // 替换路径path参数
+    if (cloneConfig.paths) {
+      cloneConfig.url = replaceURLParams(cloneConfig.url || '', cloneConfig.paths);
+    }
 
-  public head(url: string, searchParams?: Record<string, string>, option?: Partial<TelegramRequestOption>) {
-    const lastOption: Partial<TelegramRequestOption> = merge({}, option, {
-      searchParams,
-      method: 'head',
-    });
-    return this.request(url, lastOption);
-  }
+    const task = this.vm.request<Result>(cloneConfig);
 
-  public post(url: string, body?: BodyInit | null, option?: Partial<TelegramRequestOption>) {
-    const lastOption: Partial<TelegramRequestOption> = merge({}, option, {
-      body,
-      method: 'post',
+    return Object.assign(task, {
+      abort: () => controller.abort(),
     });
-    return this.request(url, lastOption);
-  }
-
-  public put(url: string, body?: BodyInit | null, option?: Partial<TelegramRequestOption>) {
-    const lastOption: Partial<TelegramRequestOption> = merge({}, option, {
-      body,
-      method: 'put',
-    });
-    return this.request(url, lastOption);
-  }
-
-  public patch(url: string, body?: BodyInit | null, option?: Partial<TelegramRequestOption>) {
-    const lastOption: Partial<TelegramRequestOption> = merge({}, option, {
-      body,
-      method: 'patch',
-    });
-    return this.request(url, lastOption);
-  }
-
-  public delete(url: string, body?: BodyInit | null, option?: Partial<TelegramRequestOption>) {
-    const lastOption: Partial<TelegramRequestOption> = merge({}, option, {
-      body,
-      method: 'delete',
-    });
-    return this.request(url, lastOption);
   }
 }
