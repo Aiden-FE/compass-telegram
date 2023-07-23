@@ -25,20 +25,56 @@ const api = new Telegram()
   })
   // 注册拦截器的演示域
   .register('interceptor', {
-    // 请求前处理
-    transformRequest: (data, headers) => {
-      console.log('Req: ', data, headers);
-      return data;
+    baseURL: 'https://api.qqsuu.cn/api',
+    interceptors: {
+      request: [
+        async (req) => {
+          console.log('第一个异步拦截器Req: ', req);
+          req.test = 'interceptor 1';
+          return req;
+        },
+        (req) => {
+          console.log('第二个同步拦截器Req: ', req);
+          req.test2 = 'interceptor 2';
+          return req;
+        },
+        (req) => {
+          console.log('最终req为: ', req);
+          return req;
+        },
+      ],
+      requestError: (error) => {
+        console.log('发生了请求前的未知异常: ', error);
+        throw error;
+      },
+      response: [
+        (data, res) => {
+          if (res.config.customMeta?.skipResponseInterceptor) {
+            console.log('接收到跳过拦截器的配置');
+            return res;
+          }
+          if (res.status >= 200 && res.status < 300) {
+            return data;
+          }
+          throw new Error('异常');
+        },
+        (data, res) => {
+          if (res.config.customMeta?.skipResponseInterceptor) {
+            console.log('接收到跳过拦截器的配置');
+            return res;
+          }
+          if (data?.code === 200) {
+            return data.data;
+          }
+          throw new Error(data?.msg || '业务异常');
+        }
+      ],
+      responseError: (error) => {
+        console.log('请求级异常发生', error);
+        // return { test: 'test' } // 如果不throw异常,则此行会将该对象作为返回值
+        throw error;
+      },
     },
-    // 请求后处理
-    transformResponse: function (...args) {
-      console.log('Response: ', ...args, this);
-      // 自定义跳过拦截器的key
-      if (this.customMeta.skipResponseInterceptor) {
-        console.log('接收到跳过拦截器的配置');
-      }
-      return args[0];
-    }
   })
   // 请求编码 域配置演示
   .register('serializer', {

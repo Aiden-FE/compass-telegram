@@ -9,7 +9,8 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="/dist/main.umd.js"></script>
 <script>
-  const api = new Telegram()
+  const TelegramClass = window.Telegram.default;
+  const api = new TelegramClass()
           .register('b', {
             headers: {
               Authorization: 'b',
@@ -17,71 +18,110 @@
           })
           .register('interceptor', {
             baseURL: 'https://api.qqsuu.cn/api',
-            transformRequest: (data, headers) => {
-              console.log('Req: ', data, headers);
-              return data;
+            interceptors: {
+              request: [
+                async (req) => {
+                  console.log('第一个异步拦截器Req: ', req);
+                  req.test = 'interceptor 1';
+                  return req;
+                },
+                (req) => {
+                  console.log('第二个同步拦截器Req: ', req);
+                  req.test2 = 'interceptor 2';
+                  return req;
+                },
+                (req) => {
+                  console.log('最终req为: ', req);
+                  return req;
+                },
+              ],
+              requestError: (error) => {
+                console.log('发生了请求前的未知异常: ', error);
+                throw error;
+              },
+              response: [
+                (data, res) => {
+                  if (res.config.customMeta?.skipResponseInterceptor) {
+                    console.log('接收到跳过拦截器的配置');
+                    return res;
+                  }
+                  if (res.status >= 200 && res.status < 300) {
+                    return data;
+                  }
+                  throw new Error('异常');
+                },
+                (data, res) => {
+                  if (res.config.customMeta?.skipResponseInterceptor) {
+                    console.log('接收到跳过拦截器的配置');
+                    return res;
+                  }
+                  if (data?.code === 200) {
+                    return data.data;
+                  }
+                  throw new Error(data?.msg || '业务异常');
+                }
+              ],
+              responseError: (error) => {
+                console.log('请求级异常发生', error);
+                // return { test: 'test' } // 如果不throw异常,则此行会将该对象作为返回值
+                throw error;
+              },
             },
-            transformResponse: function (...args) {
-              console.log('Response: ', ...args, this);
-              if (this.customMeta.skipResponseInterceptor) {
-                console.log('接收到跳过拦截器的配置');
-              }
-              return args[0];
-            }
           });
   console.log('Api instance: ', api);
 
   // 使用底层API直接请求
-  api.request({
-    url: 'https://api.qqsuu.cn/api/dm-ipquery',
-  }).then((result) => {
-    console.log('使用底层API直接请求: ', result);
-  });
+  // api.request({
+  //   url: 'https://api.qqsuu.cn/api/dm-ipquery',
+  // }).then((result) => {
+  //   console.log('使用底层API直接请求: ', result);
+  // });
   // 请求取消测试
-  const demo2 = api.request({
-    url: 'https://api.qqsuu.cn/api/dm-xjj?type=json',
-  });
-  demo2.then((result) => {
-    console.log('请求取消测试: ', result);
-  })
-  demo2.abort();
+  // const demo2 = api.request({
+  //   url: 'https://api.qqsuu.cn/api/dm-xjj?type=json',
+  // });
+  // demo2.then((result) => {
+  //   console.log('请求取消测试: ', result);
+  // })
+  // demo2.abort();
   // 测试使用b域内的接口
-  api.request({
-    url: 'https://api.qqsuu.cn/api/dm-ipquery',
-    domain: 'b',
-  }).then((result) => {
-    console.log('测试使用b域内的接口: ', result);
-  });
+  // api.request({
+  //   url: 'https://api.qqsuu.cn/api/dm-ipquery',
+  //   domain: 'b',
+  // }).then((result) => {
+  //   console.log('测试使用b域内的接口: ', result);
+  // });
   // 使用链式请求
-  api.chain()
-    .get('https://api.qqsuu.cn/api/dm-ipquery')
-    .request()
-    .then((result) => {
-      console.log('使用链式请求: ', result);
-    });
+  // api.chain()
+  //   .get('https://api.qqsuu.cn/api/dm-ipquery')
+  //   .request()
+  //   .then((result) => {
+  //     console.log('使用链式请求: ', result);
+  //   });
   // 使用链式请求配置路径参数,url查询参数,body参数及取消请求
-  const demo3 = api.chain()
-    .get('https://api.qqsuu.cn/api/:test')
-    .path('test', 'dm-xjj')
-    .searchParams({ type: 'json2' })
-    .body({ test: 'test' })
-    .request();
-  demo3.then((result) => {
-    console.log('使用链式请求配置路径参数,url查询参数,body参数及取消请求: ', result);
-  });
-  demo3.abort();
+  // const demo3 = api.chain()
+  //   .get('https://api.qqsuu.cn/api/:test')
+  //   .path('test', 'dm-xjj')
+  //   .searchParams({ type: 'json2' })
+  //   .body({ test: 'test' })
+  //   .request();
+  // demo3.then((result) => {
+  //   console.log('使用链式请求配置路径参数,url查询参数,body参数及取消请求: ', result);
+  // });
+  // demo3.abort();
   // 使用链式请求设置请求体
-  api.chain()
-    .post('https://api.qqsuu.cn/api/dm-xjj')
-    .body({ test: 'test' })
-    .request()
-    .abort();
+  // api.chain()
+  //   .post('https://api.qqsuu.cn/api/dm-xjj')
+  //   .body({ test: 'test' })
+  //   .request()
+  //   .abort();
   // 拦截器演示
-  api.chain()
-    .domain('interceptor')
-    .post('dm-comment')
-    .request()
-    .then(result => console.log('拦截器演示', result));
+  // api.chain()
+  //   .domain('interceptor')
+  //   .post('dm-comment')
+  //   .searchParams({ format: 'json' })
+  //   .request()
+  //   .then(result => console.log('经过拦截器后收到的最终结果', result));
   // 跳过拦截器演示
   api.chain()
     .domain('interceptor')
@@ -90,15 +130,15 @@
     .request()
     .then(result => console.log('拦截器演示', result));
   // retry演示
-  api.chain()
-    .post('https://api.qqsuu.cn/api/retry')
-    .retry({
-      retries: 3,
-      // 自定义延时
-      retryDelay: (count) => 1000 * count,
-    })
-    .request()
-    .then(result => console.log('retry演示', result));
+  // api.chain()
+  //   .post('https://api.qqsuu.cn/api/retry')
+  //   .retry({
+  //     retries: 3,
+  //     // 自定义延时
+  //     retryDelay: (count) => 1000 * count,
+  //   })
+  //   .request()
+  //   .then(result => console.log('retry演示', result));
   // 请求体编码
   // api.chain()
   //   .post('test')
