@@ -1,6 +1,6 @@
 {
   "name": "@compass-aiden/telegram",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "基于 Axios 封装的Http请求模块",
   "main": "dist/main.umd.js",
   "jsdelivr": "dist/main.umd.js",
@@ -76,6 +76,7 @@
     "rollup-plugin-ts": "~3.0.2",
     "rollup-plugin-visualizer": "^5.9.2",
     "ts-jest": "~29.0.5",
+    "tslib": "^2.6.0",
     "typescript": "~4.8.4"
   }
 }

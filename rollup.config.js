@@ -32,7 +32,7 @@ function getPlugins(disablePlugins = [], options = {}) {
       ),
     // 如果目标是node环境,需要提供选项{ exportConditions: ["node"] }以支持构建
     !disablePlugins.includes('nodeResolve') && nodeResolve(options.nodeResolve || undefined),
-    !disablePlugins.includes('commonjs') && isProd && commonjs(options.commonjs || undefined),
+    !disablePlugins.includes('commonjs') && commonjs(options.commonjs || undefined),
     !disablePlugins.includes('terser') && isProd && terser(options.terser || undefined),
     !disablePlugins.includes('cleanup') && isProd && cleanup(options.cleanup || { comments: 'none' }),
     !disablePlugins.includes('summary') &&
@@ -86,7 +86,7 @@ export default [
       dir: undefined,
       chunkFileNames: undefined,
       entryFileNames: undefined,
-      exports: 'auto',
+      exports: 'named',
       globals: {
         axios: 'axios',
       },
