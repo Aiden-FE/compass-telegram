@@ -1,53 +1,54 @@
+import { builtinModules } from 'module';
 import json from '@rollup/plugin-json';
 import ts from 'rollup-plugin-ts';
-import { builtinModules } from 'module';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 import terser from '@rollup/plugin-terser';
 import cleanup from 'rollup-plugin-cleanup';
 import summary from 'rollup-plugin-summary';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
-import serve from 'rollup-plugin-serve';
 import { visualizer } from 'rollup-plugin-visualizer';
-import pkg from './package.json';
+import serve from 'rollup-plugin-serve';
+import pkg from './package.json' assert { type: 'json' };
 
-const isProd = !process.env.ROLLUP_WATCH;
+const IS_PROD = !process.env.ROLLUP_WATCH;
 
 /**
  * @description 获取构建插件
- * @param {('serve'|'nodeResolve'|'commonjs'|'compiler'|'terser'|'cleanup'|'summary'|'visualizer')[]} disablePlugins 待禁用的插件
- * @param {{[key: string]: object}} options
- * @return {(Plugin|false|{generateBundle: generateBundle, name: string})[]}
+ * @param {Record<'json'|'ts'|'nodeResolve'|'commonjs'|'terser'|'cleanup'|'summary'|'visualizer', object>} [options]
+ * @param {('json'|'ts'|'nodeResolve'|'commonjs'|'terser'|'cleanup'|'summary'|'visualizer')[]} [ignorePlugins]
+ * @returns
  */
-function getPlugins(disablePlugins = [], options = {}) {
+function getPlugins(options = {}, ignorePlugins = []) {
   return [
-    json(),
-    ts(),
-    !disablePlugins.includes('serve') &&
-      !isProd &&
+    !ignorePlugins.includes('json') && json(options.json || undefined),
+    !ignorePlugins.includes('ts') && ts(options.ts || undefined),
+    !IS_PROD &&
+      !ignorePlugins.includes('serve') &&
       serve(
         options.serve || {
           port: 3000,
           contentBase: '.',
         },
       ),
-    // 如果目标是node环境,需要提供选项{ exportConditions: ["node"] }以支持构建
-    !disablePlugins.includes('nodeResolve') && nodeResolve(options.nodeResolve || undefined),
-    !disablePlugins.includes('commonjs') && commonjs(options.commonjs || undefined),
-    !disablePlugins.includes('terser') && isProd && terser(options.terser || undefined),
-    !disablePlugins.includes('cleanup') && isProd && cleanup(options.cleanup || { comments: 'none' }),
-    !disablePlugins.includes('summary') &&
-      isProd &&
-      summary(
-        options.summary || {
-          totalLow: 1024 * 8,
-          totalHigh: 1024 * 20,
-          showBrotliSize: true,
-          showGzippedSize: true,
-          showMinifiedSize: true,
-        },
-      ),
-    !disablePlugins.includes('visualizer') && isProd && visualizer(),
-  ];
+    // todo: 如果部分包导入异常,可启用该项. 如果目标是node环境,需要提供选项{ browser: false, exportConditions: ['node'] }以支持构建
+    !IS_PROD && !ignorePlugins.includes('nodeResolve') && nodeResolve(options.nodeResolve || undefined),
+    !ignorePlugins.includes('commonjs') && commonjs(options.commonjs || undefined),
+    IS_PROD && !ignorePlugins.includes('terser') && terser(options.terser || undefined),
+    IS_PROD && !ignorePlugins.includes('cleanup') && cleanup({ comments: 'none', ...(options.cleanup || {}) }),
+    IS_PROD &&
+      !ignorePlugins.includes('summary') &&
+      summary({
+        showGzippedSize: true,
+        ...(options.summary || {}),
+      }),
+    IS_PROD &&
+      !ignorePlugins.includes('visualizer') &&
+      visualizer({
+        gzipSize: true,
+        // template: 'treemap', // network, treemap,sunburst, default: treemap
+        ...(options.visualizer || {}),
+      }),
+  ].filter((item) => !!item);
 }
 
 /**
@@ -70,52 +71,49 @@ function getOutput(options = {}) {
     format: 'es',
     chunkFileNames: 'bundle/chunk.[format].[hash].js',
     entryFileNames: '[name].[format].js',
-    sourcemap: isProd,
+    sourcemap: IS_PROD,
     ...options,
   };
 }
 
 export default [
-  // umd bundle
+  // umd
   {
     input: 'src/main.ts',
     output: getOutput({
       format: 'umd',
-      file: pkg.main,
-      name: 'Telegram' || pkg.name, // Set your library name.
+      file: 'dist/main.umd.js',
+      name: pkg.name, // Set your library name.
       dir: undefined,
       chunkFileNames: undefined,
       entryFileNames: undefined,
-      exports: 'named',
-      globals: {
-        axios: 'axios',
-      },
+      exports: 'auto',
     }),
-    external: getExternal(Object.keys(pkg.peerDependencies)),
-    plugins: getPlugins(undefined, {
+    external: getExternal(),
+    plugins: getPlugins({
       nodeResolve: { browser: true },
     }),
+    watch: {
+      include: ['src/**', 'index.html'],
+    },
   },
-  // commonjs bundle
-  isProd && {
+  // node
+  IS_PROD && {
     input: 'src/main.ts',
     output: getOutput({
       format: 'cjs',
       exports: 'auto',
     }),
-    external: getExternal(Object.keys(pkg.peerDependencies)),
-    plugins: getPlugins(undefined, {
+    external: getExternal(),
+    plugins: getPlugins({
       nodeResolve: { browser: false, exportConditions: ['node'] },
     }),
   },
-  // esm bundle
-  isProd && {
+  // esm
+  IS_PROD && {
     input: 'src/main.ts',
     output: getOutput(),
-    external: getExternal(Object.keys(pkg.peerDependencies)),
+    external: getExternal(),
     plugins: getPlugins(),
-    watch: {
-      include: ['src/**', 'index.html'],
-    },
   },
 ].filter((item) => !!item);

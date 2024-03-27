@@ -72,7 +72,19 @@ export default class TelegramCore {
     // eslint-disable-next-line no-param-reassign
     delete option.interceptors;
 
-    this.domainMap.set(domain, option);
+    this.domainMap.set(
+      domain,
+      merge(
+        {
+          timeout: 1000 * 10,
+          headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+          },
+          responseType: 'json',
+        },
+        option,
+      ),
+    );
     return this;
   }
 

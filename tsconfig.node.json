@@ -1,23 +1,8 @@
 {
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    },
-    "declaration": false,
-    "types": [
-      "@types/node",
-      "@types/jest"
-    ]
+    "composite": true,
+    "types": ["node"]
   },
-  "include": [
-    "./**/*.js",
-    "./**/*.cjs",
-    "./**/*.spec.ts"
-  ]
+  "include": [".eslintrc.cjs", "jest.config.cjs", "commitlint.config.js", "rollup.config.js"]
 }
