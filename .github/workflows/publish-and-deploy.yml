@@ -67,6 +67,7 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          # ssh-key: ${{ secrets.SSH_KEY }} # 解决受保护标签问题 参考 https://github.com/orgs/community/discussions/10906#discussioncomment-8717893
 
       # 更新npm版本
       - name: Updated version
