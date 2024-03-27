@@ -36,6 +36,15 @@ export default class TelegramChain {
     return this;
   }
 
+  /** 批量设置路径参数 */
+  paths(data: Record<string, string>) {
+    this.option.paths = {
+      ...this.option.paths,
+      ...data,
+    };
+    return this;
+  }
+
   /** 采用指定业务域的配置 */
   domain(domain: string | symbol) {
     this.option.domain = domain;
@@ -51,6 +60,30 @@ export default class TelegramChain {
   /** 设置请求体参数 */
   body(data: any) {
     this.option.data = data;
+    return this;
+  }
+
+  /** 设置请求头信息 */
+  headers(headers: Partial<HttpTelegramReqConfig['headers']>) {
+    this.option.headers = {
+      ...this.option.headers,
+      ...headers,
+    } as HttpTelegramReqConfig['headers'];
+    return this;
+  }
+
+  /** 设置自定义元数据 */
+  customMeta(data: HttpTelegramReqConfig['customMeta']) {
+    this.option.customMeta = {
+      ...this.option.customMeta,
+      ...data,
+    };
+    return this;
+  }
+
+  /** 设置响应数据类型 */
+  responseType(type: HttpTelegramReqConfig['responseType']) {
+    this.option.responseType = type;
     return this;
   }
 
