@@ -31,7 +31,7 @@ function getPlugins(options = {}, ignorePlugins = []) {
         },
       ),
     // todo: 如果部分包导入异常,可启用该项. 如果目标是node环境,需要提供选项{ browser: false, exportConditions: ['node'] }以支持构建
-    !IS_PROD && !ignorePlugins.includes('nodeResolve') && nodeResolve(options.nodeResolve || undefined),
+    !ignorePlugins.includes('nodeResolve') && nodeResolve(options.nodeResolve || undefined),
     !ignorePlugins.includes('commonjs') && commonjs(options.commonjs || undefined),
     IS_PROD && !ignorePlugins.includes('terser') && terser(options.terser || undefined),
     IS_PROD && !ignorePlugins.includes('cleanup') && cleanup({ comments: 'none', ...(options.cleanup || {}) }),
@@ -89,7 +89,7 @@ export default [
       entryFileNames: undefined,
       exports: 'auto',
     }),
-    external: getExternal(),
+    external: getExternal(Object.keys(pkg.dependencies)),
     plugins: getPlugins({
       nodeResolve: { browser: true },
     }),
@@ -104,7 +104,8 @@ export default [
       format: 'cjs',
       exports: 'auto',
     }),
-    external: getExternal(),
+    external: getExternal(Object.keys(pkg.dependencies)),
+    // external: getExternal(Object.keys(pkg.dependencies).filter((key) => !['lodash-es'].includes(key))),
     plugins: getPlugins({
       nodeResolve: { browser: false, exportConditions: ['node'] },
     }),
@@ -113,7 +114,7 @@ export default [
   IS_PROD && {
     input: 'src/main.ts',
     output: getOutput(),
-    external: getExternal(),
+    external: getExternal(Object.keys(pkg.dependencies)),
     plugins: getPlugins(),
   },
 ].filter((item) => !!item);
